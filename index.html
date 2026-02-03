@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Chart.js Hello World</title>
+  </head>
+  <body>
+    <h1>Chart.js Hello World</h1>
+
+    <canvas id="chart" width="600" height="300"></canvas>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+      const ctx = document.getElementById("chart");
+
+      new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: ["t0", "t1", "t2", "t3", "t4"],
+          datasets: [
+            {
+              label: "Hello world",
+              data: [1, 2, 3, 2, 4],
+            },
+          ],
+        },
+      });
+    </script>
+  </body>
+</html>
+
