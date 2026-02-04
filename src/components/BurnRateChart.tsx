@@ -48,8 +48,52 @@ function computeBurnRateLine(
   ]
 }
 
+function computeWindowedBurnRate(
+  instantBurnRate: number,
+  windowSize: number,
+  incidentStart: number,
+  incidentEnd: number,
+  currentTime: number
+): number {
+  const windowStart = currentTime - windowSize
+  const windowEnd = currentTime
+
+  const overlapStart = Math.max(windowStart, incidentStart)
+  const overlapEnd = Math.min(windowEnd, incidentEnd)
+  const overlap = Math.max(0, overlapEnd - overlapStart)
+
+  return (instantBurnRate * overlap) / windowSize
+}
+
+function computeWindowedBurnRateLine(
+  instantBurnRate: number,
+  windowSize: number,
+  incidentStart: number,
+  incidentEnd: number,
+  maxTime: number
+): { x: number; y: number }[] {
+  const points: { x: number; y: number }[] = []
+  const step = maxTime / 200
+
+  for (let t = 0; t <= maxTime; t += step) {
+    const y = computeWindowedBurnRate(
+      instantBurnRate,
+      windowSize,
+      incidentStart,
+      incidentEnd,
+      t
+    )
+    points.push({ x: t, y })
+  }
+
+  return points
+}
+
 export default function BurnRateChart({ config }: BurnRateChartProps) {
   const burnRate = computeBurnRate(config.sloTarget, config.badEventRate)
+  const incidentStart = 5
+  const incidentEnd = incidentStart + config.badEventDurationMinutes
+
   const burnRateLine = computeBurnRateLine(
     config.sloTarget,
     config.badEventRate,
@@ -59,16 +103,48 @@ export default function BurnRateChart({ config }: BurnRateChartProps) {
   const xAxisMax = config.longWindowMinutes * 1.3
   const yAxisMax = Math.max(burnRate * 1.5, config.criticalBurnRate * 1.2)
 
+  const shortWindowLine = computeWindowedBurnRateLine(
+    burnRate,
+    config.shortWindowMinutes,
+    incidentStart,
+    incidentEnd,
+    xAxisMax
+  )
+
+  const longWindowLine = computeWindowedBurnRateLine(
+    burnRate,
+    config.longWindowMinutes,
+    incidentStart,
+    incidentEnd,
+    xAxisMax
+  )
+
   const data = {
     datasets: [
       {
-        label: 'Burn Rate',
+        label: 'Instantaneous Burn Rate',
         data: burnRateLine,
         borderColor: '#2196f3',
         backgroundColor: 'rgba(33, 150, 243, 0.1)',
         fill: true,
         tension: 0,
         pointRadius: 0,
+      },
+      {
+        label: `Short Window (${config.shortWindowMinutes}m)`,
+        data: shortWindowLine,
+        borderColor: '#4caf50',
+        borderWidth: 2,
+        pointRadius: 0,
+        fill: false,
+      },
+      {
+        label: `Long Window (${config.longWindowMinutes}m)`,
+        data: longWindowLine,
+        borderColor: '#ff9800',
+        borderWidth: 2,
+        pointRadius: 0,
+        fill: false,
       },
       {
         label: 'Critical Threshold',
