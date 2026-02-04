@@ -7,7 +7,9 @@ import {
   Title,
   Tooltip,
   Legend,
+  Filler,
 } from 'chart.js'
+import annotationPlugin from 'chartjs-plugin-annotation'
 import { Line } from 'react-chartjs-2'
 import type { SloConfig } from '../App'
 
@@ -18,7 +20,9 @@ ChartJS.register(
   LineElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  Filler,
+  annotationPlugin
 )
 
 interface BurnRateChartProps {
@@ -89,6 +93,51 @@ function computeWindowedBurnRateLine(
   return points
 }
 
+function findAlertZone(
+  instantBurnRate: number,
+  shortWindow: number,
+  longWindow: number,
+  incidentStart: number,
+  incidentEnd: number,
+  threshold: number,
+  maxTime: number
+): { start: number; end: number } | null {
+  const step = maxTime / 500
+  let alertStart: number | null = null
+  let alertEnd: number | null = null
+
+  for (let t = 0; t <= maxTime; t += step) {
+    const shortRate = computeWindowedBurnRate(
+      instantBurnRate,
+      shortWindow,
+      incidentStart,
+      incidentEnd,
+      t
+    )
+    const longRate = computeWindowedBurnRate(
+      instantBurnRate,
+      longWindow,
+      incidentStart,
+      incidentEnd,
+      t
+    )
+
+    const bothAbove = shortRate >= threshold && longRate >= threshold
+
+    if (bothAbove && alertStart === null) {
+      alertStart = t
+    } else if (!bothAbove && alertStart !== null && alertEnd === null) {
+      alertEnd = t
+    }
+  }
+
+  if (alertStart !== null) {
+    return { start: alertStart, end: alertEnd ?? maxTime }
+  }
+
+  return null
+}
+
 export default function BurnRateChart({ config }: BurnRateChartProps) {
   const burnRate = computeBurnRate(config.sloTarget, config.badEventRate)
   const incidentStart = 5
@@ -119,14 +168,22 @@ export default function BurnRateChart({ config }: BurnRateChartProps) {
     xAxisMax
   )
 
+  const alertZone = findAlertZone(
+    burnRate,
+    config.shortWindowMinutes,
+    config.longWindowMinutes,
+    incidentStart,
+    incidentEnd,
+    config.criticalBurnRate,
+    xAxisMax
+  )
+
   const data = {
     datasets: [
       {
         label: 'Instantaneous Burn Rate',
         data: burnRateLine,
         borderColor: '#2196f3',
-        backgroundColor: 'rgba(33, 150, 243, 0.1)',
-        fill: true,
         tension: 0,
         pointRadius: 0,
       },
@@ -186,6 +243,22 @@ export default function BurnRateChart({ config }: BurnRateChartProps) {
     plugins: {
       legend: {
         position: 'top' as const,
+      },
+      annotation: {
+        annotations: alertZone
+          ? {
+              alertBox: {
+                type: 'box' as const,
+                xMin: alertZone.start,
+                xMax: alertZone.end,
+                yMin: 0,
+                yMax: yAxisMax,
+                backgroundColor: 'rgba(244, 67, 54, 0.15)',
+                borderColor: 'rgba(244, 67, 54, 0.3)',
+                borderWidth: 1,
+              },
+            }
+          : {},
       },
     },
   }
