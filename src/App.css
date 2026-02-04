@@ -1,0 +1,26 @@
+.app {
+  padding: 20px;
+  min-height: 100vh;
+}
+
+.app h1 {
+  margin-bottom: 20px;
+  font-weight: 500;
+}
+
+.main-content {
+  display: grid;
+  grid-template-columns: 7fr 3fr;
+  gap: 20px;
+  height: calc(100vh - 100px);
+}
+
+.chart-content {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

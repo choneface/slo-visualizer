@@ -1,0 +1,46 @@
+.config-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+}
+
+.config-form fieldset {
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 16px;
+  background: white;
+}
+
+.config-form legend {
+  font-weight: 500;
+  padding: 0 8px;
+}
+
+.config-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 12px;
+}
+
+.config-form label:first-of-type {
+  margin-top: 0;
+}
+
+.config-form label span {
+  font-size: 14px;
+  color: #666;
+}
+
+.config-form input {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.config-form input:focus {
+  outline: none;
+  border-color: #2196f3;
+}

@@ -1,123 +1,12 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Chart.js Hello World</title>
-    <link rel="stylesheet" href="styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SLO Visualizer</title>
   </head>
   <body>
-    <h1>Chart.js Hello World</h1>
-
-    <div class="main-content">
-
-	    <div class="chart-content">
-    <canvas id="chart"></canvas>
-	    </div>
-
-	<form id="inputForm">
-
-	    <fieldset>
-		<legend>SLO Information</legend>
-
-		<label for="sloTarget">SLO Target (% availability):</label>
-		<input type="number" id="sloTarget" name="sloTarget" min="0" max="100" step="0.01" value=99>
-		<br>
-
-		<label for="evaluationWindowDays">Evaluation Window (days):</label>
-		<input type="number" id="evaluationWindowDays" name="evaluationWindowDays" min="1" step="1" value=7>
-		<br>
-	    </fieldset>
-
-	    <fieldset>
-		<legend>Burn Rate Windows</legend>
-
-		<label for="shortWindowMinutes">Short Window (minutes):</label>
-		<input type="number" id="shortWindowMinutes" name="shortWindowMinutes" min="1" step="1" value=5>
-		<br>
-
-		<label for="longWindowMinutes">Long Window (minutes):</label>
-		<input type="number" id="longWindowMinutes" name="longWindowMinutes" min="1" step="1" value=60>
-		<br>
-	    </fieldset>
-
-	    <fieldset>
-		<legend>Alert Threshold</legend>
-
-		<label for="criticalBurnRate">Critical Burn Rate:</label>
-		<input type="number" id="criticalBurnRate" name="criticalBurnRate" min="0" step="0.1" value="3.36">
-		<br>
-
-	    </fieldset>
-
-	    <fieldset>
-		<legend>Hypothetical Situation</legend>
-
-		<label for="badEventRate">Bad Event Rate:</label>
-		<input type="number" id="badEventRate" name="badEventRate" min="0" max="100" step="0.01" value=20>
-		<br>
-
-		<label for="badEventDurationMinutes">Bad Event Duration (minutes):</label>
-		<input type="number" id="badEventDurationMinutes" name="badEventDurationMinutes" min="0" max="100" step="0.01" value=5>
-		<br>
-
-	    </fieldset>
-	    <button type="submit">Update Chart</button>
-	</form>
-    </div>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <script>
-	    function getXAxisMax() {
-		const longWindow = Number(document.getElementById("longWindowMinutes").value)
-		    return longWindow * 1.3
-		    
-	    }
-	    function getYAxisMax() {
-		    const burnRate = computeBurnRate()
-		    return burnRate * 1.5
-	    }
-	    function computeBurnRate() {
-		const sloTarget = Number(document.getElementById("sloTarget").value)
-		const observedBadEventRate = Number(document.getElementById("badEventRate").value)
-		return observedBadEventRate / (100 - sloTarget)
-	    }
-
-	    function computeBurnRateLine() {
-		const duration = Number(document.getElementById("badEventDurationMinutes").value)
-		    const burnRate = computeBurnRate()
-		    
-		    return [{x: 4.9999, y:0}, {x: 5, y: burnRate}, {x: duration + 5, y: burnRate}, {x: duration + 5.01, y:0}]
-	    }
-      const ctx = document.getElementById("chart");
-
-	    console.log(computeBurnRateLine())
-      new Chart(ctx, {
-        type: "line",
-	      options: {
-	scales: {
-		x: {
-		    type: "linear",
-		    title: { display: true, text: "Time" },
-			min: 0,
-			max: getXAxisMax() 
-		  },
-		y: {
-		    type: "linear",
-		    title: { display: true, text: "Burn Rate" },
-			min: 0,
-			max: getYAxisMax()
-		  }
-	}},
-        data: {
-          datasets: [
-            {
-              label: "Burn Rate",
-              data: computeBurnRateLine()
-            },
-          ],
-        },
-      });
-    </script>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
-
